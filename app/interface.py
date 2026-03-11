@@ -19,7 +19,7 @@ def process_document(files):
 
         store_embeddings(chunks, embeddings, file.name)
 
-    return "All documents processed successfully!"
+    return "Documents indexed successfully"
 
 
 def chat(message, history):
@@ -27,23 +27,57 @@ def chat(message, history):
     docs, ids = retrieve(message)
 
     answer = generate_answer(docs, message, ids)
+
     return answer
 
 
-with gr.Blocks() as demo:
+with gr.Blocks(
+    theme=gr.themes.Soft(),
+    title="FIND AI"
+) as demo:
 
-    gr.Markdown("# FIND AI - Intelligent Document Assistant")
+    gr.Markdown(
+        """
+        #  FIND AI  
+        ### Intelligent Document Assistant
+        Upload company documents and ask questions instantly.
+        """
+    )
 
     with gr.Row():
-        files = gr.File(label="Upload PDFs", file_count="multiple")
-        process_btn = gr.Button("Process Document")
 
-    status = gr.Textbox(label="Status")
+        with gr.Column(scale=1):
 
-    process_btn.click(process_document, inputs=files, outputs=status)
+            gr.Markdown("##  Document Upload")
 
-    gr.Markdown("## Chat with your document")
+            files = gr.File(
+                label="Upload PDFs / Markdown",
+                file_count="multiple"
+            )
 
-    chat_ui = gr.ChatInterface(fn=chat)
+            process_btn = gr.Button(" Index Documents")
+
+            status = gr.Textbox(
+                label="System Status",
+                value="Waiting for documents..."
+            )
+
+            process_btn.click(
+                process_document,
+                inputs=files,
+                outputs=status
+            )
+
+        with gr.Column(scale=3):
+
+            gr.Markdown("##  Chat with your knowledge base")
+
+            chat_ui = gr.ChatInterface(
+                fn=chat,
+                chatbot=gr.Chatbot(height=500),
+                textbox=gr.Textbox(
+                    placeholder="Ask something about your documents..."
+                )
+            )
 
 demo.launch()

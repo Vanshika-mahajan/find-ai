@@ -1,16 +1,13 @@
-# Virtual environments
-venv/
-
 # Python cache
 __pycache__/
 *.pyc
 
-# OS files
-.DS_Store
-Thumbs.db
-
 # Vector database
 vector_db/
 
-# Environment files
-.env
+# Virtual environment
+venv/
+
+# OS junk
+.DS_Store
+Thumbs.db
