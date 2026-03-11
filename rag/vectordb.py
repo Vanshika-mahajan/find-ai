@@ -6,14 +6,17 @@ client = chromadb.PersistentClient(path="vector_db")
 collection = client.get_or_create_collection("documents")
 
 
-def store_embeddings(chunks, embeddings):
+def store_embeddings(chunks, embeddings, source):
 
-    ids = [str(i) for i in range(len(chunks))]
+    ids = [f"{source}_{i}" for i in range(len(chunks))]
+
+    metadata = [{"source": source} for _ in chunks]
 
     collection.add(
         ids=ids,
         documents=chunks,
-        embeddings=embeddings
+        embeddings=embeddings,
+        metadatas=metadata
     )
 
 
@@ -24,4 +27,7 @@ def search(query_embedding, top_k=3):
         n_results=top_k
     )
 
-    return results["documents"][0]
+    documents = results["documents"][0]
+    ids = results["ids"][0]
+
+    return documents, ids

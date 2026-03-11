@@ -1,34 +1,46 @@
 import subprocess
+import os
 
 
-def generate_answer(context_chunks, question):
+def generate_answer(context_chunks, question, sources):
 
     context = "\n\n".join(context_chunks)
 
     prompt = f"""
-You are an intelligent assistant helping users understand company documents.
+Answer the question using ONLY the context below.
 
-Use ONLY the information provided in the context to answer the question.
-If the answer is not present in the context, say:
-"I cannot find the answer in the provided documents."
-
-Provide clear and concise answers.
+If the answer cannot be found in the context, say:
+"The answer is not present in the provided documents."
 
 Context:
 {context}
 
-Question:
-{question}
+Question: {question}
 
-Answer:
+Answer in 2–4 sentences:
 """
+    print("\n--- CONTEXT SENT TO LLM ---\n")
+    print(context[:1000])
 
     result = subprocess.run(
-        ["ollama", "run", "phi"],
+        ["ollama", "run", "llama3.2"],
         input=prompt,
         text=True,
         encoding="utf-8",
         capture_output=True
     )
 
-    return result.stdout
+    answer = result.stdout.strip()
+
+    source_text = "\n\nSources:\n"
+
+    for s in sources:
+        filename = os.path.basename(s)
+
+        if "_" in filename:
+            doc, chunk = filename.rsplit("_", 1)
+            source_text += f"• {doc} (Chunk {chunk})\n"
+        else:
+            source_text += f"• {filename}\n"
+
+    return answer + source_text
